@@ -3,6 +3,7 @@ package cz.school.tenniscourtreservation.service;
 import cz.school.tenniscourtreservation.exception.InvalidReservationException;
 import cz.school.tenniscourtreservation.model.Reservation;
 import cz.school.tenniscourtreservation.repository.ReservationRepository;
+import cz.school.tenniscourtreservation.model.ReservationStatus;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,16 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (overlaps) {
             throw new InvalidReservationException("Reservation overlaps with an existing reservation");
+        }
+
+        long activeFutureReservations = reservationRepository.countByUserIdAndStartTimeAfterAndStatus(
+                reservation.getUser().getId(),
+                reservation.getStartTime(),
+                ReservationStatus.CREATED
+        );
+
+        if (activeFutureReservations >= 3) {
+            throw new InvalidReservationException("User cannot have more than 3 active future reservations");
         }
 
         return reservationRepository.save(reservation);

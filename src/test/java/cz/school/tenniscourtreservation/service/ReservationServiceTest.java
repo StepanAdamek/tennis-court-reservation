@@ -4,6 +4,8 @@ import cz.school.tenniscourtreservation.exception.InvalidReservationException;
 import cz.school.tenniscourtreservation.model.Reservation;
 import cz.school.tenniscourtreservation.repository.ReservationRepository;
 import cz.school.tenniscourtreservation.service.ReservationServiceImpl;
+import cz.school.tenniscourtreservation.model.User;
+import cz.school.tenniscourtreservation.model.ReservationStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -43,6 +45,36 @@ class ReservationServiceTest {
                 reservation.getEndTime(),
                 reservation.getStartTime()
         )).thenReturn(true);
+
+        assertThrows(InvalidReservationException.class,
+                () -> reservationService.createReservation(reservation));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserHasMoreThanThreeFutureReservations() {
+        User user = new User();
+        user.setId(1L);
+
+        Court court = new Court();
+        court.setId(1L);
+
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setCourt(court);
+        reservation.setStartTime(LocalDateTime.now().plusDays(1));
+        reservation.setEndTime(LocalDateTime.now().plusDays(1).plusHours(1));
+
+        when(reservationRepository.existsByCourtIdAndStartTimeLessThanAndEndTimeGreaterThan(
+                1L,
+                reservation.getEndTime(),
+                reservation.getStartTime()
+        )).thenReturn(false);
+
+        when(reservationRepository.countByUserIdAndStartTimeAfterAndStatus(
+                1L,
+                reservation.getStartTime(),
+                ReservationStatus.CREATED
+        )).thenReturn(3L);
 
         assertThrows(InvalidReservationException.class,
                 () -> reservationService.createReservation(reservation));
