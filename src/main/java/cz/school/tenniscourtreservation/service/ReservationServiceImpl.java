@@ -4,6 +4,7 @@ import cz.school.tenniscourtreservation.exception.InvalidReservationException;
 import cz.school.tenniscourtreservation.model.Reservation;
 import cz.school.tenniscourtreservation.repository.ReservationRepository;
 import cz.school.tenniscourtreservation.model.ReservationStatus;
+import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +42,12 @@ public class ReservationServiceImpl implements ReservationService {
         if (activeFutureReservations >= 3) {
             throw new InvalidReservationException("User cannot have more than 3 active future reservations");
         }
+
+        BigDecimal pricePerHour = reservation.getStartTime().getHour() >= 17
+                ? new BigDecimal("300")
+                : new BigDecimal("200");
+
+        reservation.setTotalPrice(pricePerHour);
 
         return reservationRepository.save(reservation);
     }

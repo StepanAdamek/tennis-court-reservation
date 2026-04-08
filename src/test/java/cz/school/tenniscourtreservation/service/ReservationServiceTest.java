@@ -6,6 +6,8 @@ import cz.school.tenniscourtreservation.repository.ReservationRepository;
 import cz.school.tenniscourtreservation.service.ReservationServiceImpl;
 import cz.school.tenniscourtreservation.model.User;
 import cz.school.tenniscourtreservation.model.ReservationStatus;
+import java.math.BigDecimal;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -78,6 +80,39 @@ class ReservationServiceTest {
 
         assertThrows(InvalidReservationException.class,
                 () -> reservationService.createReservation(reservation));
+    }
+
+    @Test
+    void shouldCalculateEveningPriceCorrectly() {
+        User user = new User();
+        user.setId(1L);
+
+        Court court = new Court();
+        court.setId(1L);
+
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setCourt(court);
+        reservation.setStartTime(LocalDateTime.now().plusDays(1).withHour(18).withMinute(0));
+        reservation.setEndTime(LocalDateTime.now().plusDays(1).withHour(19).withMinute(0));
+
+        when(reservationRepository.existsByCourtIdAndStartTimeLessThanAndEndTimeGreaterThan(
+                1L,
+                reservation.getEndTime(),
+                reservation.getStartTime()
+        )).thenReturn(false);
+
+        when(reservationRepository.countByUserIdAndStartTimeAfterAndStatus(
+                1L,
+                reservation.getStartTime(),
+                ReservationStatus.CREATED
+        )).thenReturn(0L);
+
+        when(reservationRepository.save(reservation)).thenReturn(reservation);
+
+        Reservation createdReservation = reservationService.createReservation(reservation);
+
+        assertEquals(new BigDecimal("300"), createdReservation.getTotalPrice());
     }
 }
 

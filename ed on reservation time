@@ -1,0 +1,23 @@
+[33mcommit 1251bf889fb0397eeb1a3a997d8851b80b8cac25[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Štěpán <Štěpán@DESKTOP-5KPURFS>
+Date:   Wed Apr 8 16:49:58 2026 +0200
+
+    Add validation for maximum future reservations per user
+
+[33mcommit c571582d1951257ff0a1d1e2720c8bd0fbf36c44[m
+Author: Štěpán <Štěpán@DESKTOP-5KPURFS>
+Date:   Wed Apr 8 16:45:49 2026 +0200
+
+    Add overlap validation for reservations
+
+[33mcommit e7d61624cffe5e1b7ac4d5b037cca8360cc1ce58[m
+Author: Štěpán <Štěpán@DESKTOP-5KPURFS>
+Date:   Wed Apr 8 16:30:56 2026 +0200
+
+    Move test to correct test directory
+
+[33mcommit 4de3d23233ec523337131bbd267af8be063b52c7[m
+Author: Štěpán <Štěpán@DESKTOP-5KPURFS>
+Date:   Wed Apr 8 16:23:35 2026 +0200
+
+    Add initial domain model entities
