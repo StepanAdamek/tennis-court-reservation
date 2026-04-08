@@ -51,4 +51,14 @@ public class ReservationServiceImpl implements ReservationService {
 
         return reservationRepository.save(reservation);
     }
+
+    @Override
+    public Reservation cancelReservation(Reservation reservation) {
+        if (reservation.getStartTime().isBefore(LocalDateTime.now().plusHours(24))) {
+            throw new InvalidReservationException("Reservation can only be cancelled at least 24 hours before start");
+        }
+
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        return reservation;
+    }
 }

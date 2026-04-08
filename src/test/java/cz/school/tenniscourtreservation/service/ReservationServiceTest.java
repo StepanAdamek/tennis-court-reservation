@@ -114,5 +114,26 @@ class ReservationServiceTest {
 
         assertEquals(new BigDecimal("300"), createdReservation.getTotalPrice());
     }
+
+    @Test
+    void shouldThrowExceptionWhenCancellingLessThan24HoursBeforeStart() {
+        Reservation reservation = new Reservation();
+        reservation.setStartTime(LocalDateTime.now().plusHours(10));
+        reservation.setStatus(ReservationStatus.CREATED);
+
+        assertThrows(InvalidReservationException.class,
+                () -> reservationService.cancelReservation(reservation));
+    }
+
+    @Test
+    void shouldCancelReservationWhenMoreThan24HoursBeforeStart() {
+        Reservation reservation = new Reservation();
+        reservation.setStartTime(LocalDateTime.now().plusDays(2));
+        reservation.setStatus(ReservationStatus.CREATED);
+
+        Reservation cancelledReservation = reservationService.cancelReservation(reservation);
+
+        assertEquals(ReservationStatus.CANCELLED, cancelledReservation.getStatus());
+    }
 }
 

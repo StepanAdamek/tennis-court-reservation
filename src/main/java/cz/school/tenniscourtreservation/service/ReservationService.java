@@ -6,4 +6,5 @@ public interface ReservationService {
 
     Reservation createReservation(Reservation reservation);
 
+    Reservation cancelReservation(Reservation reservation);
 }
