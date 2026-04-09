@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +57,16 @@ class ReservationControllerTest {
         when(reservationService.getAllReservations()).thenReturn(List.of(new Reservation()));
 
         mockMvc.perform(get("/api/reservations"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldCancelReservationAndReturn200() throws Exception {
+        Reservation reservation = new Reservation();
+
+        when(reservationService.cancelReservationById(1L)).thenReturn(reservation);
+
+        mockMvc.perform(put("/api/reservations/1/cancel"))
                 .andExpect(status().isOk());
     }
 }

@@ -141,5 +141,20 @@ class ReservationServiceTest {
 
         assertEquals(ReservationStatus.CANCELLED, cancelledReservation.getStatus());
     }
+
+    @Test
+    void shouldCancelReservationById() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStartTime(LocalDateTime.now().plusDays(2));
+        reservation.setStatus(ReservationStatus.CREATED);
+
+        when(reservationRepository.findById(1L)).thenReturn(java.util.Optional.of(reservation));
+        when(reservationRepository.save(reservation)).thenReturn(reservation);
+
+        Reservation cancelledReservation = reservationService.cancelReservationById(1L);
+
+        assertEquals(ReservationStatus.CANCELLED, cancelledReservation.getStatus());
+    }
 }
 
