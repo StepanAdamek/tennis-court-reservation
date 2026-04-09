@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
@@ -21,5 +23,10 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     public Reservation createReservation(@Valid @RequestBody CreateReservationRequest request) {
         return reservationService.createReservation(request);
+    }
+
+    @GetMapping
+    public List<Reservation> getAllReservations() {
+        return reservationService.getAllReservations();
     }
 }
