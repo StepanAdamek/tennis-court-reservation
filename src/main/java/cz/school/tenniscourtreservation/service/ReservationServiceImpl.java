@@ -1,19 +1,50 @@
 package cz.school.tenniscourtreservation.service;
 
+import cz.school.tenniscourtreservation.dto.CreateReservationRequest;
 import cz.school.tenniscourtreservation.exception.InvalidReservationException;
+import cz.school.tenniscourtreservation.exception.ResourceNotFoundException;
+import cz.school.tenniscourtreservation.model.Court;
 import cz.school.tenniscourtreservation.model.Reservation;
 import cz.school.tenniscourtreservation.model.ReservationStatus;
+import cz.school.tenniscourtreservation.model.User;
+import cz.school.tenniscourtreservation.repository.CourtRepository;
 import cz.school.tenniscourtreservation.repository.ReservationRepository;
+import cz.school.tenniscourtreservation.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Service
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final UserRepository userRepository;
+    private final CourtRepository courtRepository;
 
-    public ReservationServiceImpl(ReservationRepository reservationRepository) {
+    public ReservationServiceImpl(ReservationRepository reservationRepository,
+                                  UserRepository userRepository,
+                                  CourtRepository courtRepository) {
         this.reservationRepository = reservationRepository;
+        this.userRepository = userRepository;
+        this.courtRepository = courtRepository;
+    }
+
+    @Override
+    public Reservation createReservation(CreateReservationRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Court court = courtRepository.findById(request.getCourtId())
+                .orElseThrow(() -> new ResourceNotFoundException("Court not found"));
+
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setCourt(court);
+        reservation.setStartTime(request.getStartTime());
+        reservation.setEndTime(request.getEndTime());
+
+        return createReservation(reservation);
     }
 
     @Override

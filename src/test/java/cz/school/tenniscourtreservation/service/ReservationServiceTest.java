@@ -6,6 +6,8 @@ import cz.school.tenniscourtreservation.repository.ReservationRepository;
 import cz.school.tenniscourtreservation.service.ReservationServiceImpl;
 import cz.school.tenniscourtreservation.model.User;
 import cz.school.tenniscourtreservation.model.ReservationStatus;
+import cz.school.tenniscourtreservation.repository.CourtRepository;
+import cz.school.tenniscourtreservation.repository.UserRepository;
 import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,11 @@ import static org.mockito.Mockito.when;
 class ReservationServiceTest {
 
     private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
-    private final ReservationService reservationService = new ReservationServiceImpl(reservationRepository);
+    private final UserRepository userRepository = mock(UserRepository.class);
+    private final CourtRepository courtRepository = mock(CourtRepository.class);
+
+    private final ReservationService reservationService =
+            new ReservationServiceImpl(reservationRepository, userRepository, courtRepository);
 
     @Test
     void shouldThrowExceptionWhenReservationIsInPast() {
