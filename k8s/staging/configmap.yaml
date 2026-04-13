@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tennis-app-config
+  namespace: tennis-staging
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-service:5432/tennis_reservation_db
+  SPRING_DATASOURCE_USERNAME: postgres
+  APP_ENV: staging
