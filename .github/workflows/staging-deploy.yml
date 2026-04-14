@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/tennis-court-reservation
+      IMAGE_NAME: ghcr.io/stepanadamek/tennis-court-reservation
       IMAGE_TAG: staging-${{ github.sha }}
 
     steps:
