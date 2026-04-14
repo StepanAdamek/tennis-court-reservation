@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: tennis-app
-          image: tennis-court-reservation:ci
+          image: ghcr.io/stepanadamek/tennis-court-reservation:staging-latest
           ports:
             - containerPort: 8080
           env:

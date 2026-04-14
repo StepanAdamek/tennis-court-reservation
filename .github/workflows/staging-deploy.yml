@@ -1,0 +1,65 @@
+name: Staging Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "master", "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/tennis-court-reservation
+      IMAGE_TAG: staging-${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
+      - name: Push Docker image
+        run: docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" > $HOME/.kube/config
+
+      - name: Apply staging manifests
+        run: |
+          kubectl apply -f k8s/staging/namespace.yaml
+          kubectl apply -f k8s/staging/configmap.yaml
+          kubectl apply -f k8s/staging/secret.yaml
+          kubectl apply -f k8s/staging/postgres-deployment.yaml
+          kubectl apply -f k8s/staging/postgres-service.yaml
+          kubectl apply -f k8s/staging/app-service.yaml
+          kubectl apply -f k8s/staging/app-deployment.yaml
+
+      - name: Update image in staging deployment
+        run: |
+          kubectl set image deployment/tennis-app-deployment \
+            tennis-app=$IMAGE_NAME:$IMAGE_TAG \
+            -n tennis-staging
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/tennis-app-deployment -n tennis-staging --timeout=180s
