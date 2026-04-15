@@ -101,6 +101,7 @@ Request → Controller → Service → Repository → Database → Response
 
 ## Struktura projektu
 
+```
 src/
 ├── main/
 │ ├── java/cz/school/tenniscourtreservation/
@@ -122,6 +123,7 @@ src/
 k8s/
 ├── staging/ # staging prostředí
 └── production/ # production prostředí
+```
 
 .github/workflows/ # CI/CD pipeline
 
