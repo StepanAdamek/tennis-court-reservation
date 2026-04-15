@@ -316,8 +316,9 @@ http://localhost:8080/actuator/health
 ### Docker
 
 ```bash
-docker build -t tennis-app .
-docker run -p 8080:8080 tennis-app
+git clone https://github.com/StepanAdamek/tennis-court-reservation.git
+cd tennis-court-reservation
+docker compose up --build
 ```
 
 ---
