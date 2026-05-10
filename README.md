@@ -1,51 +1,60 @@
-# Rezervační systém tenisových kurtů
+# Tennis Court Reservation System
+
+![CI](https://github.com/StepanAdamek/tennis-court-reservation/actions/workflows/ci.yml/badge.svg)
 
 ## Přehled projektu
 
-Tato aplikace je REST API vytvořené v **Spring Bootu** pro správu rezervací tenisových kurtů.
+Tato aplikace je REST API vytvořené pomocí Spring Boot pro správu rezervací tenisových kurtů.
 
-Cílem projektu bylo demonstrovat:
+Projekt byl zaměřen na:
 
 * vývoj řízený testy (TDD),
-* práci s Gitem,
-* CI/CD pipeline,
-* kontejnerizaci a nasazení do Kubernetes,
-* základní DevOps přístupy.
+* práci s Git workflow,
+* automatizované CI/CD pipeline,
+* Docker kontejnerizaci,
+* Kubernetes deployment,
+* základní DevOps procesy.
 
 ---
 
-## Technologie (Tech Stack)
+# Technologie
 
-### Backend
-- Java 21
-- Spring Boot
-- Spring Web
-- Spring Data JPA
-- Hibernate
+## Backend
 
-### Databáze
-- PostgreSQL
+* Java 21
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* Hibernate
 
-### Testování
-- JUnit 5
-- Mockito
-- Spring Boot Test
+## Databáze
 
-### Build nástroje
-- Maven
+* PostgreSQL
 
-### DevOps
-- Docker
-- Docker Compose
-- Kubernetes (Docker Desktop)
-- GitHub Actions (CI/CD)
+## Testování
 
-### Monitoring
-- Spring Boot Actuator
+* JUnit 5
+* Mockito
+* Spring Boot Test
+
+## Build nástroje
+
+* Maven
+
+## DevOps
+
+* Docker
+* Docker Compose
+* Kubernetes (Docker Desktop)
+* GitHub Actions (CI/CD)
+
+## Monitoring
+
+* Spring Boot Actuator
 
 ---
 
-## Doména aplikace
+# Doména aplikace
 
 Aplikace umožňuje:
 
@@ -54,13 +63,17 @@ Aplikace umožňuje:
 * zabránit kolizím rezervací,
 * spravovat uživatele a kurty.
 
-### Hlavní entity
+---
 
-* **User (uživatel)**
-* **Court (kurt)**
-* **Reservation (rezervace)**
+# Hlavní entity
 
-### Business pravidla
+* User
+* Court
+* Reservation
+
+---
+
+# Business pravidla
 
 * rezervace se nesmí překrývat na stejném kurtu,
 * rezervace musí být v budoucnosti,
@@ -70,148 +83,260 @@ Aplikace umožňuje:
 
 ---
 
-## Architektura
+# Architektura
 
-Aplikace je navržena ve vrstvené architektuře:
+Aplikace používá vrstvenou architekturu.
+
+## Diagram komponent
 
 ```text
 [Client]
-   ↓
+    ↓
 [Controller]
-   ↓
+    ↓
 [Service]
-   ↓
+    ↓
 [Repository]
-   ↓
+    ↓
 [Database]
 ```
 
-### Popis vrstev
+## Popis vrstev
 
-* **Controller** – REST API
-* **Service** – business logika
-* **Repository** – přístup k databázi (Spring Data JPA)
-* **Model / DTO** – datové struktury
+### Controller
 
-### Tok dat
+REST API endpointy.
 
-Request → Controller → Service → Repository → Database → Response
+### Service
+
+Obsahuje business logiku aplikace.
+
+### Repository
+
+Databázová vrstva pomocí Spring Data JPA.
+
+### Model / DTO
+
+Datové entity a přenosové objekty.
 
 ---
 
-## Struktura projektu
+# Tok dat
 
+```text
+Request
+   ↓
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ↓
+Database
+   ↓
+Response
 ```
+
+---
+
+# Struktura projektu
+
+```text
 src/
 ├── main/
-│ ├── java/cz/school/tenniscourtreservation/
-│ │ ├── controller/ # REST controllery
-│ │ ├── service/ # business logika
-│ │ ├── repository/ # přístup k databázi
-│ │ ├── model/ # entity
-│ │ ├── dto/ # přenosové objekty
-│ │ ├── exception/ # výjimky a error handling
-│ │ └── config/ # konfigurace aplikace
-│ └── resources/
-│ └── application.properties
+│   ├── java/cz/school/tenniscourtreservation/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── model/
+│   │   ├── dto/
+│   │   ├── exception/
+│   │   └── config/
+│   │
+│   └── resources/
+│       └── application.properties
 │
 ├── test/
-│ ├── controller/ # testy controllerů
-│ ├── service/ # unit testy
-│ └── integration/ # integrační testy
+│   ├── controller/
+│   ├── service/
+│   └── integration/
 │
 k8s/
-├── staging/ # staging prostředí
-└── production/ # production prostředí
-```
+├── staging/
+└── production/
 
-.github/workflows/ # CI/CD pipeline
+.github/workflows/
 
 Dockerfile
 docker-compose.yml
 pom.xml
+```
 
 ---
 
-## Testovací strategie
+# Testovací strategie
 
-### Typy testů
+## Unit testy
 
-* **Unit testy**
+Unit testy ověřují business logiku ve Service vrstvě.
 
-  * testují business logiku (Service vrstva)
-* **Integrační testy**
+Testují například:
 
-  * Controller → Service → DB
-* **Mocking**
+* validaci času rezervace,
+* kontrolu překryvu rezervací,
+* kontrolu existence uživatele a kurtu,
+* správné vytváření rezervací,
+* chování při nevalidních datech.
 
-  * použití Mockito pro izolaci komponent
+Použit je Mockito pro izolaci business logiky a mockování závislostí.
 
-### TDD přístup
+---
 
-Vývoj probíhal podle cyklu:
+## Integrační testy
 
-1. RED – napsání neprocházejícího testu
-2. GREEN – implementace minimálního řešení
+Integrační testy ověřují spolupráci:
+
+* Controller → Service → Repository → Database
+
+Testy používají:
+
+* Spring Boot Test,
+* MockMvc,
+* PostgreSQL databázi.
+
+Integrační test ověřuje:
+
+* fungování REST API,
+* serializaci/deserializaci JSON,
+* propojení vrstev aplikace,
+* ukládání rezervací do databáze.
+
+---
+
+## Mocking
+
+Mockito je použito pro:
+
+* izolaci Service vrstvy,
+* mockování repository/service závislostí.
+
+Použité test doubles:
+
+* mock,
+* stub.
+
+---
+
+## TDD přístup
+
+Vývoj probíhal pomocí cyklu:
+
+1. RED – vytvoření neprocházejícího testu
+2. GREEN – minimální implementace
 3. REFACTOR – úprava a zlepšení kódu
 
----
-
-## Code coverage
-
-Měřeno pomocí **JaCoCo**.
-
-* **Line coverage:** ~68 %
-* **Branch coverage:** ~64 %
-
-### Strategie pokrytí
-
-* vysoké pokrytí ve **Service vrstvě (~85 %)**,
-* nižší pokrytí v:
-
-  * konfiguraci,
-  * exception handlerech,
-  * hlavní třídě aplikace.
-
-Tyto části nejsou intenzivně testovány, protože neobsahují komplexní logiku.
+Refaktoring je viditelný v historii Git commitů i ve struktuře aplikace.
 
 ---
 
-## Databáze
+# Code Coverage
+
+Měřeno pomocí JaCoCo.
+
+## Coverage výsledky
+
+* Line coverage: ~68 %
+* Branch coverage: ~64 %
+
+## Strategie pokrytí
+
+Nejvyšší pokrytí je ve Service vrstvě (~85 %).
+
+Nižší pokrytí mají:
+
+* konfigurace,
+* exception handlery,
+* bootstrap třídy,
+* jednoduché DTO objekty.
+
+Tyto části neobsahují složitou business logiku.
+
+---
+
+## Zdůvodnění coverage
+
+Cílem projektu nebylo dosáhnout 100% pokrytí, ale efektivně testovat klíčovou business logiku aplikace.
+
+Největší důraz byl kladen na:
+
+* Service vrstvu,
+* validační pravidla,
+* kolize rezervací,
+* hraniční stavy,
+* integraci Controller → Service → Database.
+
+Coverage okolo 65–70 % je v tomto projektu považována za dostatečnou, protože kritická business logika je pokryta výrazně vyšším procentem.
+
+Důležitější než absolutní procento coverage bylo:
+
+* testování kritických scénářů,
+* validace business pravidel,
+* ověření integrace aplikace,
+* podpora TDD procesu vývoje.
+
+---
+
+# Databáze
 
 * PostgreSQL
 * Spring Data JPA (Hibernate)
 
 ---
 
-## CI pipeline
+# CI/CD Pipeline
 
-Použit **GitHub Actions**.
+Použit GitHub Actions.
 
-Pipeline obsahuje:
+## CI Pipeline obsahuje
 
-* build (Maven),
-* unit + integrační testy,
-* code coverage (JaCoCo),
+* Maven build,
+* unit testy,
+* integrační testy,
+* JaCoCo coverage,
 * build Docker image,
-* upload artefaktů (test reporty, coverage).
+* upload artefaktů,
+* deployment do staging prostředí.
 
 ---
 
-## Docker
+## CI/CD workflow
+
+1. Push do GitHub repozitáře
+2. GitHub Actions spustí CI pipeline
+3. Maven build + testy + coverage
+4. Docker image je vytvořen a pushnut do GitHub Container Registry
+5. Staging deployment workflow nasadí aplikaci do Kubernetes
+6. Kubernetes provede rollout nové verze aplikace
+
+---
+
+# Docker
 
 Aplikace je kontejnerizována pomocí Dockeru.
 
-### Vlastnosti:
+## Vlastnosti Docker image
 
 * reprodukovatelný build,
-* běží na portu `8080`,
-* konfigurace přes environment variables,
-* healthcheck: `/actuator/health`.
+* spuštění na portu 8080,
+* konfigurace pomocí environment variables,
+* healthcheck endpoint:
+  `/actuator/health`
 
 ---
 
-## Docker Compose (lokální vývoj)
+# Docker Compose
+
+Lokální spuštění aplikace a databáze.
 
 ```yaml
 version: '3.8'
@@ -236,97 +361,163 @@ services:
 
 ---
 
-## Kubernetes nasazení
+# Kubernetes Deployment
 
-Nasazení probíhá do lokálního clusteru (Docker Desktop).
+Nasazení probíhá do lokálního Kubernetes clusteru (Docker Desktop).
 
-### Použité resource:
+## Použité Kubernetes resource
 
 * Deployment
 * Service
 * ConfigMap
 * Secret
-* resource limits/requests
+
+## Resource limity
+
+Aplikace používá:
+
+* CPU requests/limits
+* Memory requests/limits
 
 ---
 
-## Prostředí
+# Prostředí
 
-### Staging
+## Staging
 
-* slouží pro testování
+Slouží pro testování a ověřování aplikace.
+
 * namespace: `tennis-staging`
 
-### Production
+## Production
 
-* simulované produkční prostředí
+Simulované produkční prostředí.
+
 * namespace: `tennis-production`
 
----
+## Rozdíly konfigurace
 
-## Deployment
+Staging používá testovací konfiguraci a image tagy určené pro ověřování.
 
-### Kubernetes (staging)
-
-```bash
-kubectl apply -f k8s/staging/
-kubectl port-forward service/tennis-app-service 8080:8080 -n tennis-staging
-```
-
-Aplikace dostupná na:
-
-```
-http://localhost:8080/actuator/health
-```
+Production používá oddělený namespace a samostatnou konfiguraci.
 
 ---
 
-## Bezpečnost
+# Deployment
 
-* žádná citlivá data nejsou v repozitáři,
-* používá se:
-
-  * **Kubernetes Secrets** (např. DB heslo),
-  * **GitHub Secrets** (CI/CD).
-
----
-
-## Git workflow
-
-* průběžné commity během vývoje,
-* použití feature branch,
-* merge do hlavní větve (fast-forward).
-
----
-
-## Spuštění projektu
-
-### Lokálně (Maven)
+## Lokální spuštění
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-### Testy
+## Testy
 
 ```bash
-./mvnw test
+./mvnw clean verify
 ```
 
-### Docker
+## Docker Compose
+
+```bash
+docker compose up --build
+```
+
+## Kubernetes deployment
+
+### Staging
+
+```bash
+kubectl apply -f k8s/staging/
+```
+
+### Production
+
+```bash
+kubectl apply -f k8s/production/
+```
+
+## Přístup k aplikaci
+
+```bash
+kubectl port-forward service/tennis-app-service 8080:8080 -n tennis-staging
+```
+
+Aplikace:
+
+```text
+http://localhost:8080/actuator/health
+```
+
+---
+
+# Observabilita
+
+Použit Spring Boot Actuator.
+
+## Monitoring
+
+* `/actuator/health`
+* readiness probes
+* liveness probes
+
+## Logging
+
+Logy jsou dostupné pomocí:
+
+```bash
+kubectl logs <pod-name> -n tennis-staging
+```
+
+---
+
+# Bezpečnost
+
+Citlivé údaje nejsou uloženy v repozitáři.
+
+Použité mechanismy:
+
+* Kubernetes Secrets
+* GitHub Secrets
+
+---
+
+# Git Workflow
+
+Projekt používá Git workflow:
+
+* feature branches,
+* průběžné commity,
+* merge do hlavní větve,
+* CI pipeline při push.
+
+---
+
+# Spuštění projektu
+
+## Klonování projektu
 
 ```bash
 git clone https://github.com/StepanAdamek/tennis-court-reservation.git
 cd tennis-court-reservation
+```
+
+## Maven
+
+```bash
+./mvnw clean verify
+```
+
+## Docker
+
+```bash
 docker compose up --build
 ```
 
 ---
 
-## Monitoring
+# Repository
 
-Použit Spring Boot Actuator:
+GitHub repository:
 
-```
-/actuator/health
-```
+https://github.com/StepanAdamek/tennis-court-reservation
