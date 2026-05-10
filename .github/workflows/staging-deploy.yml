@@ -55,4 +55,4 @@ jobs:
 
       - name: Wait for rollout
         shell: powershell
-        run: kubectl rollout status deployment/tennis-app-deployment -n tennis-staging --timeout=180s
+        run: kubectl rollout status deployment/tennis-app-deployment -n tennis-staging --timeout=300s
