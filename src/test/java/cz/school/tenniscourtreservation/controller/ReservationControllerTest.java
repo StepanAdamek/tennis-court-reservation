@@ -11,16 +11,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import java.time.LocalDateTime;
 import java.util.List;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("removal")
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest {
 
@@ -35,6 +41,7 @@ class ReservationControllerTest {
 
     @Test
     void shouldCreateReservationAndReturn201() throws Exception {
+
         CreateReservationRequest request = new CreateReservationRequest();
         request.setUserId(1L);
         request.setCourtId(1L);
@@ -42,6 +49,7 @@ class ReservationControllerTest {
         request.setEndTime(LocalDateTime.now().plusDays(1).plusHours(1));
 
         Reservation reservation = new Reservation();
+        reservation.setId(1L);
 
         when(reservationService.createReservation(any(CreateReservationRequest.class)))
                 .thenReturn(reservation);
@@ -49,24 +57,45 @@ class ReservationControllerTest {
         mockMvc.perform(post("/api/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(reservationService).createReservation(any(CreateReservationRequest.class));
     }
 
     @Test
     void shouldReturnAllReservations() throws Exception {
-        when(reservationService.getAllReservations()).thenReturn(List.of(new Reservation()));
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+
+        when(reservationService.getAllReservations())
+                .thenReturn(List.of(reservation));
 
         mockMvc.perform(get("/api/reservations"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1));
+
+        verify(reservationService).getAllReservations();
     }
 
     @Test
     void shouldCancelReservationAndReturn200() throws Exception {
-        Reservation reservation = new Reservation();
 
-        when(reservationService.cancelReservationById(1L)).thenReturn(reservation);
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+
+        when(reservationService.cancelReservationById(1L))
+                .thenReturn(reservation);
 
         mockMvc.perform(put("/api/reservations/1/cancel"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(reservationService).cancelReservationById(1L);
     }
 }
