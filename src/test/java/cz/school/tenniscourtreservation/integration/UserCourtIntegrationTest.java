@@ -5,6 +5,7 @@ import cz.school.tenniscourtreservation.model.Court;
 import cz.school.tenniscourtreservation.model.SurfaceType;
 import cz.school.tenniscourtreservation.model.User;
 import cz.school.tenniscourtreservation.repository.CourtRepository;
+import cz.school.tenniscourtreservation.repository.ReservationRepository;
 import cz.school.tenniscourtreservation.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,12 @@ class UserCourtIntegrationTest {
     @Autowired
     private CourtRepository courtRepository;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+
     @BeforeEach
     void setUp() {
+        reservationRepository.deleteAll();
         userRepository.deleteAll();
         courtRepository.deleteAll();
     }
