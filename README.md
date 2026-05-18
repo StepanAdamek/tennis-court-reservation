@@ -65,6 +65,28 @@ Aplikace umožňuje:
 
 ---
 
+# REST API Endpoints
+
+## Users
+
+* GET `/api/users`
+* POST `/api/users`
+* DELETE `/api/users/{id}`
+
+## Courts
+
+* GET `/api/courts`
+* POST `/api/courts`
+* DELETE `/api/courts/{id}`
+
+## Reservations
+
+* GET `/api/reservations`
+* POST `/api/reservations`
+* PUT `/api/reservations/{id}/cancel`
+
+---
+
 # Hlavní entity
 
 * User
@@ -77,9 +99,11 @@ Aplikace umožňuje:
 
 * rezervace se nesmí překrývat na stejném kurtu,
 * rezervace musí být v budoucnosti,
-* čas rezervace musí být validní (od–do),
-* uživatel i kurt musí existovat,
-* nelze vytvořit duplicitní rezervaci.
+* konec rezervace musí být po začátku rezervace,
+* uživatel může mít maximálně 3 aktivní budoucí rezervace,
+* rezervaci lze zrušit pouze více než 24 hodin před začátkem,
+* večerní rezervace mají vyšší cenu,
+* uživatel i kurt musí existovat.
 
 ---
 
@@ -176,40 +200,62 @@ pom.xml
 
 # Testovací strategie
 
-## Unit testy
+## Controller testy
 
-Unit testy ověřují business logiku ve Service vrstvě.
+Controller testy ověřují REST API vrstvu aplikace.
+
+Testují například:
+
+* HTTP status kódy,
+* JSON response,
+* serializaci/deserializaci dat,
+* správné volání service vrstvy.
+
+Použité technologie:
+
+* MockMvc
+* Mockito
+* JUnit 5
+
+---
+
+## Service testy
+
+Service testy ověřují business logiku aplikace izolovaně bez databáze.
 
 Testují například:
 
 * validaci času rezervace,
 * kontrolu překryvu rezervací,
-* kontrolu existence uživatele a kurtu,
-* správné vytváření rezervací,
-* chování při nevalidních datech.
+* limit maximálně 3 aktivních rezervací,
+* storno rezervace méně než 24 hodin před začátkem,
+* výpočet ceny rezervace,
+* vytváření a mazání uživatelů a kurtů,
+* výjimky a chybové scénáře.
 
-Použit je Mockito pro izolaci business logiky a mockování závislostí.
+Použit je Mockito pro mockování repository závislostí.
 
 ---
 
 ## Integrační testy
 
-Integrační testy ověřují spolupráci:
+Integrační testy ověřují propojení:
 
-* Controller → Service → Repository → Database
+* Controller → Service → Repository → PostgreSQL
 
 Testy používají:
 
-* Spring Boot Test,
-* MockMvc,
-* PostgreSQL databázi.
+* Spring Boot Test
+* MockMvc
+* PostgreSQL databázi
 
-Integrační test ověřuje:
+Integrační testy ověřují:
 
 * fungování REST API,
-* serializaci/deserializaci JSON,
-* propojení vrstev aplikace,
-* ukládání rezervací do databáze.
+* ukládání dat do databáze,
+* mazání dat z databáze,
+* propojení všech vrstev aplikace,
+* reálné business scénáře aplikace.
 
 ---
 
@@ -218,12 +264,13 @@ Integrační test ověřuje:
 Mockito je použito pro:
 
 * izolaci Service vrstvy,
-* mockování repository/service závislostí.
+* mockování repository/service závislostí,
+* ověřování volání metod pomocí verify().
 
 Použité test doubles:
 
-* mock,
-* stub.
+* mock
+* stub
 
 ---
 
@@ -245,44 +292,50 @@ Měřeno pomocí JaCoCo.
 
 ## Coverage výsledky
 
-* Line coverage: ~68 %
-* Branch coverage: ~64 %
+* Line coverage: 77 %
+* Branch coverage: 72 %
 
 ## Strategie pokrytí
 
-Nejvyšší pokrytí je ve Service vrstvě (~85 %).
+Nejvyšší pokrytí má Service vrstva:
 
-Nižší pokrytí mají:
+* Service layer: 91 % line coverage
+* Controller layer: 100 % line coverage
 
-* konfigurace,
-* exception handlery,
-* bootstrap třídy,
-* jednoduché DTO objekty.
+Testy pokrývají:
 
-Tyto části neobsahují složitou business logiku.
+* business pravidla rezervací,
+* REST API endpointy,
+* validační scénáře,
+* výjimky a chybové stavy,
+* práci s databází,
+* integrační scénáře.
+
+Nižší coverage zůstává hlavně v:
+
+* konfiguraci aplikace,
+* exception handlerech,
+* bootstrap třídách,
+* jednoduchých DTO objektech.
+
+Tyto části neobsahují komplexní business logiku.
 
 ---
 
 ## Zdůvodnění coverage
 
-Cílem projektu nebylo dosáhnout 100% pokrytí, ale efektivně testovat klíčovou business logiku aplikace.
+Cílem projektu nebylo dosáhnout 100% pokrytí, ale efektivně testovat kritickou business logiku aplikace.
 
 Největší důraz byl kladen na:
 
 * Service vrstvu,
 * validační pravidla,
 * kolize rezervací,
-* hraniční stavy,
+* storno rezervací,
+* výpočet ceny,
 * integraci Controller → Service → Database.
 
-Coverage okolo 65–70 % je v tomto projektu považována za dostatečnou, protože kritická business logika je pokryta výrazně vyšším procentem.
-
-Důležitější než absolutní procento coverage bylo:
-
-* testování kritických scénářů,
-* validace business pravidel,
-* ověření integrace aplikace,
-* podpora TDD procesu vývoje.
+Coverage přes 70 % je v tomto projektu považována za dostatečnou, protože kritická business logika je pokryta výrazně vyšším procentem.
 
 ---
 
